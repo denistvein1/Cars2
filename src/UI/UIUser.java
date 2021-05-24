@@ -5,8 +5,9 @@ import Service.Service;
 import Service.ServiceCart;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class UIUser implements UII {
@@ -26,24 +27,36 @@ public class UIUser implements UII {
 
     private void printEntity() {
         System.out.println(currentEntity);
-        try {
+/*        try {
             currentEntity.openLink();
         } catch (URISyntaxException e) {
             System.out.println("Invalid URL link: " + currentEntity.getLink() + "!");
         } catch (IOException e) {
             System.out.println("Failed to launch browser!");
-        }
+        }*/
     }
 
-    private void buyEntity() {
+    private void printNext() throws UnsupportedOperationException {
+        if (!service.areElements()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            currentEntity = iterator.next();
+        } catch (NoSuchElementException | ConcurrentModificationException e) {
+            iterator = service.getAll().iterator();
+            currentEntity = iterator.next();
+        }
+        printEntity();
+    }
+
+    private void buyEntity() throws IOException {
         serviceCart.add(currentEntity);
-        System.out.println(currentEntity + " bought");
+        System.out.println(currentEntity.toStringNoLink() + " bought\n");
     }
 
     private void iterateEntities() {
         try {
-            currentEntity = service.getNext(iterator);
-            printEntity();
+            printNext();
         } catch (UnsupportedOperationException e) {
             System.out.println("No cars available!");
             return;
@@ -67,11 +80,24 @@ public class UIUser implements UII {
             if (choice == 0) {
                 break;
             } else if (choice == 1) {
-                currentEntity = service.getNext(iterator);
-                printEntity();
+                printNext();
+                iterateEntitiesOptions();
             } else if (choice == 2) {
-                buyEntity();
-            } else if (choice == 3) {
+                try {
+                    buyEntity();//Always in this order
+                } catch (IOException e) {
+                    System.out.println("Something went wrong with the file");
+                    e.printStackTrace();
+                } catch (UnsupportedOperationException e) {
+                    System.out.println(currentEntity.toStringNoLink() + " already bought\n");
+                    return;
+                }
+                try {
+                    printNext();
+                } catch (UnsupportedOperationException e) {
+                    System.out.println("No cars available!");
+                    return;
+                }
                 iterateEntitiesOptions();
             } else {
                 System.out.println("Invalid input!");
@@ -80,9 +106,26 @@ public class UIUser implements UII {
     }
 
     private void printShoppingCart() {
-        for (Car entity : serviceCart.getAll()) {
-            System.out.println(entity);
+        try {
+            serviceCart.open();
+        } catch (IOException e) {
+            System.out.println("Something went wrong");
+            e.printStackTrace();
         }
+    }
+
+    private void clearShoppingCart() {
+        if (!serviceCart.areElements()) {
+            System.out.println("Shopping cart is already empty");
+            return;
+        }
+        try {
+            serviceCart.clear();
+        } catch (IOException e) {
+            System.out.println("Something went wrong with the file");
+            e.printStackTrace();
+        }
+        System.out.println("Shopping cart cleared");
     }
 
     @Override
@@ -94,7 +137,6 @@ public class UIUser implements UII {
         System.out.println("0. Back");
         System.out.println("1. Next");
         System.out.println("2. Buy");
-        System.out.println("3. Print options again");
     }
 
     @Override
@@ -102,7 +144,8 @@ public class UIUser implements UII {
         System.out.println("0. Back");
         System.out.println("1. Iterate through all the cars");
         System.out.println("2. Display shopping cart");
-        System.out.println("3. Print options again");
+        System.out.println("3. Clear shopping cart");
+        System.out.println("4. Print options again");
     }
 
     @Override
@@ -127,8 +170,9 @@ public class UIUser implements UII {
                 options();
             } else if (choice == 2) {
                 printShoppingCart();
-                options();
             } else if (choice == 3) {
+                clearShoppingCart();
+            } else if (choice == 4) {
                 options();
             } else {
                 System.out.println("Invalid input!");

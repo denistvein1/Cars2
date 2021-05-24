@@ -3,7 +3,7 @@ package UI;
 import Domain.Car;
 import Service.Service;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -53,11 +53,14 @@ public class UIAdmin implements UII {
         }
         try {
             service.add(entity);
-            System.out.println(entity + " added");
+            System.out.println(entity.toStringNoLink() + " added");
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid input!");
         } catch (UnsupportedOperationException e) {
-            System.out.println(entity.getCompany() + " " + entity.getModel() + " " + entity.getYear() + " already exists");
+            System.out.println(entity.toStringNoLink() + " already exists");
+        } catch (IOException e) {
+            System.out.println("Something went wrong with the file");
+            e.printStackTrace();
         }
     }
 
@@ -71,11 +74,12 @@ public class UIAdmin implements UII {
         }
         try {
             service.delete(entity);
-            System.out.println(entity + " deleted");
+            System.out.println(entity.toStringNoLink() + " deleted");
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid input!");
-        } catch (UnsupportedOperationException e) {
-            System.out.println(entity.getCompany() + " " + entity.getModel() + " " + entity.getYear() + " doesn't exist");
+        } catch (IOException e) {
+            System.out.println("Something went wrong with the file");
+            e.printStackTrace();
         }
     }
 
@@ -89,21 +93,23 @@ public class UIAdmin implements UII {
         }
         try {
             service.update(entity);
-            System.out.println(entity + " updated");
+            System.out.println(entity.toStringNoLink() + " updated");
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid input!");
         } catch (UnsupportedOperationException e) {
-            System.out.println(entity.getCompany() + " " + entity.getModel() + " " + entity.getYear() + " doesn't exist");
+            System.out.println(entity.toStringNoLink() + " doesn't exist");
+        } catch (IOException e) {
+            System.out.println("Something went wrong with the file");
+            e.printStackTrace();
         }
     }
 
     private void printAll() {
-        ArrayList<Car> allEntities = service.getAll();
-        if (allEntities.size() == 0) {
+        if(!service.areElements()){
             System.out.println("Empty list");
         }
-        for (Car entity : allEntities) {
-            System.out.println(entity);
+        for (Car entity : service.getAll()) {
+            System.out.print(entity);
         }
     }
 

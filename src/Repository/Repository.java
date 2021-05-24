@@ -2,6 +2,7 @@ package Repository;
 
 import Domain.Car;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Repository<T> {
@@ -12,7 +13,7 @@ public class Repository<T> {
         entities = new ArrayList<>();
     }
 
-    public void add(T entity) throws UnsupportedOperationException {
+    public void add(T entity) throws UnsupportedOperationException, IOException {
         if (entities.contains(entity)) {
             throw new UnsupportedOperationException();
         } else {
@@ -20,7 +21,7 @@ public class Repository<T> {
         }
     }
 
-    public void delete(T entity) throws UnsupportedOperationException {
+    public void delete(T entity) throws UnsupportedOperationException, IOException {
         if (!entities.contains(entity)) {
             throw new UnsupportedOperationException();
         } else {
@@ -28,7 +29,7 @@ public class Repository<T> {
         }
     }
 
-    public void update(T entity) throws UnsupportedOperationException {
+    public void update(T entity) throws UnsupportedOperationException, IOException {
         if (!entities.contains(entity)) {
             throw new UnsupportedOperationException();
         } else {

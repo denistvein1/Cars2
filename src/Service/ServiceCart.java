@@ -1,26 +1,35 @@
 package Service;
 
-import Repository.Repository;
+import Repository.RepositoryFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ServiceCart<T> extends Service<T> {
 
-    private final Repository<T> cart;
+    private final RepositoryFile<T> cart;
 
-    public ServiceCart(Repository<T> repository) {
-        super(repository);
-        cart = new Repository<T>();
+    public ServiceCart(RepositoryFile<T> repositoryFile, RepositoryFile<T> cart) {
+        super(repositoryFile);
+        this.cart = cart;
     }
 
     @Override
-    public void add(T entity) throws UnsupportedOperationException {
+    public void add(T entity) throws UnsupportedOperationException, IOException {
         cart.add(entity);
-        super.repository.delete(entity);
+        super.repositoryFile.delete(entity);
     }
 
     @Override
     public ArrayList<T> getAll() {
         return cart.getEntities();
+    }
+
+    public void clear() throws IOException {
+        cart.clear();
+    }
+
+    public void open() throws IOException {
+        cart.open();
     }
 }
